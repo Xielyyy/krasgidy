@@ -7,9 +7,12 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity,
-  ListRenderItem 
+  ListRenderItem,
+  SafeAreaView,
+  StatusBar
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 // Типы данных
 type AlertType = 'water' | 'electricity' | 'carwash';
@@ -136,32 +139,67 @@ const HomeScreen = () => {
   );
 
   return (
-    <ScrollView style={styles.container}>
-      {/* Секция с оповещениями */}
-      <Text style={styles.sectionTitle}>Ближайшие события</Text>
-      <FlatList
-        horizontal
-        data={alerts}
-        renderItem={renderAlertItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.alertsContainer}
-        showsHorizontalScrollIndicator={false}
-      />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="dark-content" />
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>Главная</Text>
+        <TouchableOpacity 
+          style={styles.notificationButton}
+          onPress={() => router.push('/notification')}
+        >
+          <Ionicons name="notifications-outline" size={24} color="#333" />
+        </TouchableOpacity>
+      </View>
 
-      {/* Секция с новостями */}
-      <Text style={styles.sectionTitle}>Новости города</Text>
-      <FlatList
-        data={news}
-        renderItem={renderNewsItem}
-        keyExtractor={(item) => item.id}
-        scrollEnabled={false}
-      />
-    </ScrollView>
+      <ScrollView style={styles.container}>
+        {/* Секция с оповещениями */}
+        <Text style={styles.sectionTitle}>Ближайшие события</Text>
+        <FlatList
+          horizontal
+          data={alerts}
+          renderItem={renderAlertItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.alertsContainer}
+          showsHorizontalScrollIndicator={false}
+        />
+
+        {/* Секция с новостями */}
+        <Text style={styles.sectionTitle}>Новости города</Text>
+        <FlatList
+          data={news}
+          renderItem={renderNewsItem}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+        />
+      </ScrollView>
+    </SafeAreaView>
   );
 };
 
 // Стили
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  notificationButton: {
+    padding: 8,
+  },
   container: {
     flex: 1,
     padding: 16,

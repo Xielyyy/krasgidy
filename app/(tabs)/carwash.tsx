@@ -7,20 +7,29 @@ import {
   StyleSheet,
   ActivityIndicator,
   Alert,
-  ScrollView,
+  ScrollView
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps';
+import { Link, useLocalSearchParams, router } from 'expo-router';
 
 export default function CarWashScreen() {
+  const params = useLocalSearchParams();
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [carNumber, setCarNumber] = useState('');
   const [carModel, setCarModel] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
-  const [isAvailable, setIsAvailable] = useState(true); // Статус мойки (свободно/занято)
+  const [isAvailable, setIsAvailable] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [bookings, setBookings] = useState<any[]>([]); // Локальное хранилище для записей
-  const [selectedLocation, setSelectedLocation] = useState<{ latitude: number; longitude: number } | null>(null); // Выбранное место на карте
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  // Если перешли с предвыбранной услугой
+  useEffect(() => {
+    if (params?.service) {
+      setSelectedService(params.service as string);
+    }
+  }, [params]);
 
   const services = [
     { id: '1', name: 'Мойка Кузова' },
@@ -29,7 +38,6 @@ export default function CarWashScreen() {
     { id: '4', name: 'Предпродажная мойка' },
   ];
 
-  // Координаты Красноярска
   const initialRegion = {
     latitude: 56.0153,
     longitude: 92.8932,
@@ -37,29 +45,24 @@ export default function CarWashScreen() {
     longitudeDelta: 0.1,
   };
 
-  // Проверка доступности мойки
   useEffect(() => {
     checkAvailability();
-  }, [bookings]); // Зависимость от bookings
+  }, [bookings]);
 
   const checkAvailability = () => {
-    // Если есть активные записи, мойка занята
     const activeBookings = bookings.filter(booking => booking.status === 'active');
     setIsAvailable(activeBookings.length === 0);
   };
 
-  // Выбор услуги
   const handleServiceSelect = (service: string) => {
     setSelectedService(service);
   };
 
-  // Выбор места на карте
   const handleMapPress = (event: any) => {
     const { coordinate } = event.nativeEvent;
     setSelectedLocation(coordinate);
   };
 
-  // Отправка данных (локально)
   const handleSubmit = () => {
     if (!selectedService || !carNumber || !carModel || !phoneNumber || !selectedLocation) {
       Alert.alert('Ошибка', 'Заполните все поля и выберите место на карте!');
@@ -73,32 +76,40 @@ export default function CarWashScreen() {
 
     setLoading(true);
 
-    // Имитация задержки отправки данных
     setTimeout(() => {
-      // Создаем новую запись
       const newBooking = {
-        id: String(bookings.length + 1), // Уникальный ID
+        id: String(bookings.length + 1),
         service: selectedService,
         carModel,
         carNumber,
         phoneNumber,
-        location: selectedLocation, // Место на карте
-        status: 'active', // Статус мойки
-        timestamp: new Date().toISOString(), // Время записи
+        location: selectedLocation,
+        status: 'active',
+        timestamp: new Date().toISOString(),
       };
 
-      // Добавляем запись в локальное хранилище
       setBookings(prevBookings => [...prevBookings, newBooking]);
-
       Alert.alert('Успех', 'Запись успешна!');
-      setIsAvailable(false); // Мойка становится занятой
+      setIsAvailable(false);
       setLoading(false);
-    }, 1000); // Имитация задержки сети
+      
+      // Возврат назад после успешной записи
+      router.back();
+    }, 1000);
   };
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
-      {/* Заголовок в синем блоке */}
+      {/* Кнопка назад */}
+      <TouchableOpacity 
+        style={styles.backButton}
+        onPress={() => router.back()}
+      >
+        <Ionicons name="arrow-back" size={24} color="#007AFF" />
+        <Text style={styles.backButtonText}>Назад</Text>
+      </TouchableOpacity>
+
+      {/* Заголовок */}
       <View style={styles.header}>
         <Text style={styles.headerText}>АвтоУслуги</Text>
       </View>
@@ -149,7 +160,7 @@ export default function CarWashScreen() {
         </MapView>
       </View>
 
-      {/* Форма для заполнения данных */}
+      {/* Форма */}
       <View style={styles.form}>
         <TextInput
           style={styles.input}
@@ -172,7 +183,7 @@ export default function CarWashScreen() {
         />
       </View>
 
-      {/* Статус мойки (светофор) */}
+      {/* Статус мойки */}
       <View style={styles.availabilityContainer}>
         <View
           style={[
@@ -186,7 +197,11 @@ export default function CarWashScreen() {
       </View>
 
       {/* Кнопка записи */}
-      <TouchableOpacity style={styles.submitButton} onPress={handleSubmit} disabled={loading}>
+      <TouchableOpacity 
+        style={styles.submitButton} 
+        onPress={handleSubmit} 
+        disabled={loading}
+      >
         {loading ? (
           <ActivityIndicator color="#fff" />
         ) : (
@@ -203,6 +218,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     padding: 16,
     backgroundColor: '#f5f5f5',
+  },
+  backButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  backButtonText: {
+    color: '#007AFF',
+    fontSize: 16,
+    marginLeft: 8,
   },
   header: {
     backgroundColor: '#007AFF',

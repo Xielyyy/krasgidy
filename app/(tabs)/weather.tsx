@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { 
+  View, 
+  Text, 
+  StyleSheet, 
+  Image, 
+  TouchableOpacity, 
+  ActivityIndicator,
+  ScrollView
+} from 'react-native';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 type WeatherData = {
@@ -21,20 +29,20 @@ const WeatherScreen = () => {
   useEffect(() => {
     const fetchWeatherData = async () => {
       try {
-        // Мок данные, соответствующие стилю KRA$GID
+        // Мок данные в стиле KRA$GID
         const mockData: WeatherData = {
           city: 'Красноярск',
           temperature: '+15°',
           condition: 'Облачно',
           humidity: '75% влажность',
-          pressure: '755 мм давление',
-          wind: '5 м/с ветер',
+          pressure: '755 мм рт.ст.',
+          wind: '5 м/с, СЗ',
           icon: 'https://openweathermap.org/img/wn/04d@4x.png'
         };
         
         setWeatherData(mockData);
       } catch (err) {
-        setError('Не удалось загрузить данные');
+        setError('Не удалось загрузить данные о погоде');
       } finally {
         setLoading(false);
       }
@@ -46,7 +54,7 @@ const WeatherScreen = () => {
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#2F80ED" />
+        <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
@@ -62,7 +70,7 @@ const WeatherScreen = () => {
             setError(null);
           }}
         >
-          <Text style={styles.retryText}>Повторить</Text>
+          <Text style={styles.retryText}>Повторить попытку</Text>
         </TouchableOpacity>
       </View>
     );
@@ -72,41 +80,62 @@ const WeatherScreen = () => {
     <View style={styles.container}>
       {/* Шапка */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#2F80ED" />
-        </TouchableOpacity>
         <Text style={styles.headerTitle}>Погода</Text>
-        <View style={{ width: 24 }} />
       </View>
 
-      <ScrollView style={styles.content}>
+      <ScrollView contentContainerStyle={styles.content}>
         {/* Основная информация */}
-        <View style={styles.mainInfo}>
+        <View style={styles.weatherCard}>
           <Text style={styles.city}>{weatherData?.city}</Text>
-          <View style={styles.temperatureContainer}>
+          <View style={styles.weatherMain}>
             <Text style={styles.temperature}>{weatherData?.temperature}</Text>
-            <Image 
-              source={{ uri: weatherData?.icon }} 
-              style={styles.weatherIcon}
-            />
+            <View>
+              <Text style={styles.condition}>{weatherData?.condition}</Text>
+              {weatherData?.icon && (
+                <Image 
+                  source={{ uri: weatherData.icon }} 
+                  style={styles.weatherIcon}
+                />
+              )}
+            </View>
           </View>
-          <Text style={styles.condition}>{weatherData?.condition}</Text>
         </View>
 
-        {/* Детали */}
-        <View style={styles.details}>
+        {/* Детали погоды */}
+        <View style={styles.detailsCard}>
           <View style={styles.detailItem}>
-            <Ionicons name="water-outline" size={20} color="#2F80ED" />
-            <Text style={styles.detailText}>{weatherData?.humidity}</Text>
+            <MaterialIcons name="opacity" size={24} color="#007AFF" />
+            <Text style={styles.detailLabel}>Влажность</Text>
+            <Text style={styles.detailValue}>{weatherData?.humidity}</Text>
           </View>
+          
           <View style={styles.detailItem}>
-            <Ionicons name="speedometer-outline" size={20} color="#2F80ED" />
-            <Text style={styles.detailText}>{weatherData?.pressure}</Text>
+            <MaterialIcons name="speed" size={24} color="#007AFF" />
+            <Text style={styles.detailLabel}>Давление</Text>
+            <Text style={styles.detailValue}>{weatherData?.pressure}</Text>
           </View>
+          
           <View style={styles.detailItem}>
-            <Ionicons name="flag-outline" size={20} color="#2F80ED" />
-            <Text style={styles.detailText}>{weatherData?.wind}</Text>
+            <MaterialIcons name="air" size={24} color="#007AFF" />
+            <Text style={styles.detailLabel}>Ветер</Text>
+            <Text style={styles.detailValue}>{weatherData?.wind}</Text>
           </View>
+        </View>
+
+        {/* Прогноз на неделю */}
+        <Text style={styles.sectionTitle}>Прогноз на неделю</Text>
+        <View style={styles.forecastContainer}>
+          {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day, i) => (
+            <View key={day} style={styles.forecastDay}>
+              <Text style={styles.forecastDayText}>{day}</Text>
+              <MaterialIcons 
+                name={i % 2 ? "wb-sunny" : "wb-cloudy"} 
+                size={28} 
+                color={i % 2 ? "#FFC107" : "#9E9E9E"} 
+              />
+              <Text style={styles.forecastTemp}>{i % 2 ? '+18°' : '+14°'}</Text>
+            </View>
+          ))}
         </View>
       </ScrollView>
     </View>
@@ -116,87 +145,122 @@ const WeatherScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    backgroundColor: '#007AFF',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
     alignItems: 'center',
-    padding: 16,
-    paddingTop: 50,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F2F2F2',
-  },
-  backButton: {
-    padding: 4,
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#1A1A1A',
+    color: 'white',
   },
   content: {
-    flex: 1,
-    paddingHorizontal: 16,
+    padding: 16,
+    paddingBottom: 80,
   },
-  mainInfo: {
-    alignItems: 'center',
-    paddingVertical: 24,
+  weatherCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+    elevation: 2,
   },
   city: {
     fontSize: 18,
-    color: '#666666',
+    color: '#666',
+    textAlign: 'center',
     marginBottom: 8,
   },
-  temperatureContainer: {
+  weatherMain: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginVertical: 8,
   },
   temperature: {
-    fontSize: 64,
+    fontSize: 48,
     fontWeight: '300',
-    color: '#1A1A1A',
-    marginRight: 16,
-  },
-  weatherIcon: {
-    width: 80,
-    height: 80,
+    color: '#333',
   },
   condition: {
     fontSize: 18,
-    color: '#1A1A1A',
+    color: '#333',
+    marginBottom: 8,
   },
-  details: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 24,
-    paddingHorizontal: 16,
+  weatherIcon: {
+    width: 60,
+    height: 60,
+    alignSelf: 'center',
+  },
+  detailsCard: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    elevation: 2,
   },
   detailItem: {
+    flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F8FAFF',
-    padding: 16,
-    borderRadius: 12,
-    width: '30%',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#F2F2F2',
   },
-  detailText: {
+  detailLabel: {
+    flex: 1,
+    fontSize: 16,
+    color: '#666',
+    marginLeft: 12,
+  },
+  detailValue: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#333',
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 12,
+    marginLeft: 4,
+  },
+  forecastContainer: {
+    backgroundColor: 'white',
+    borderRadius: 12,
+    padding: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    elevation: 2,
+  },
+  forecastDay: {
+    alignItems: 'center',
+  },
+  forecastDayText: {
     fontSize: 14,
-    color: '#1A1A1A',
-    marginTop: 8,
-    textAlign: 'center',
+    color: '#666',
+    marginBottom: 8,
+  },
+  forecastTemp: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#333',
+    marginTop: 4,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F8F9FA',
     padding: 24,
   },
   errorText: {
@@ -206,13 +270,13 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#2F80ED',
+    backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
   },
   retryText: {
-    color: '#FFFFFF',
+    color: 'white',
     fontSize: 16,
     fontWeight: '500',
   },

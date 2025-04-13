@@ -40,9 +40,8 @@ const notificationsData = [
 ];
 
 export default function NotificationsScreen() {
-  const [selectedFilter, setSelectedFilter] = useState('Все'); // Состояние для фильтра
+  const [selectedFilter, setSelectedFilter] = useState('Все');
 
-  // Фильтрация уведомлений
   const filteredNotifications = notificationsData.filter((notification) => {
     if (selectedFilter === 'Все') return true;
     return notification.type === selectedFilter;
@@ -50,12 +49,12 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Заголовок на синем фоне */}
+      {/* Заголовок */}
       <View style={styles.header}>
         <Text style={styles.headerText}>Уведомления</Text>
       </View>
 
-      {/* Фильтры */}
+      {/* Фильтры - стилизованы как в примере */}
       <View style={styles.filtersContainer}>
         <TouchableOpacity
           style={[
@@ -64,7 +63,7 @@ export default function NotificationsScreen() {
           ]}
           onPress={() => setSelectedFilter('Все')}
         >
-          <Text style={styles.filterText}>Все</Text>
+          <Text style={selectedFilter === 'Все' ? styles.activeFilterText : styles.filterText}>Все</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -73,7 +72,7 @@ export default function NotificationsScreen() {
           ]}
           onPress={() => setSelectedFilter('Записи')}
         >
-          <Text style={styles.filterText}>Записи</Text>
+          <Text style={selectedFilter === 'Записи' ? styles.activeFilterText : styles.filterText}>Записи</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={[
@@ -82,11 +81,11 @@ export default function NotificationsScreen() {
           ]}
           onPress={() => setSelectedFilter('Отключения')}
         >
-          <Text style={styles.filterText}>Отключения</Text>
+          <Text style={selectedFilter === 'Отключения' ? styles.activeFilterText : styles.filterText}>Отключения</Text>
         </TouchableOpacity>
       </View>
 
-      {/* Список уведомлений */}
+      {/* Список уведомлений - стилизован как в примере */}
       <ScrollView style={styles.notificationsList}>
         {filteredNotifications.map((notification) => (
           <View key={notification.id} style={styles.notificationItem}>
@@ -106,45 +105,53 @@ export default function NotificationsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F5F5F5',
   },
   header: {
-    backgroundColor: '#007AFF',
-    padding: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
   },
   headerText: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#fff',
+    color: 'white',
   },
   filtersContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     padding: 16,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
+    borderBottomColor: '#E0E0E0',
   },
   filterButton: {
-    padding: 8,
-    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    borderRadius: 20,
   },
   activeFilter: {
     backgroundColor: '#007AFF',
   },
   filterText: {
     fontSize: 16,
-    color: '#333',
+    color: '#333333',
+  },
+  activeFilterText: {
+    fontSize: 16,
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
   notificationsList: {
     padding: 16,
   },
   notificationItem: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 12,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -153,22 +160,25 @@ const styles = StyleSheet.create({
   },
   notificationType: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    color: '#666666',
+    marginBottom: 6,
+    textTransform: 'uppercase',
   },
   notificationTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 4,
+    color: '#333333',
+    marginBottom: 8,
   },
   notificationDescription: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    fontSize: 16,
+    color: '#666666',
+    marginBottom: 8,
+    lineHeight: 22,
   },
   notificationDate: {
-    fontSize: 12,
-    color: '#999',
+    fontSize: 14,
+    color: '#999999',
+    textAlign: 'right',
   },
 });

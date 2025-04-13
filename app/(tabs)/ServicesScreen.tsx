@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons} from '@expo/vector-icons';
 import { Link } from 'expo-router';
 
 type ServiceItem = {
@@ -18,14 +18,14 @@ const ServicesScreen = () => {
       data: [
         { id: '1', name: 'Транспорт', icon: 'bus', link: '/(tabs)/TransportScreen' },
         { id: '2', name: 'Мойка', icon: 'car', link: '/(tabs)/carwash' }, // Указываем полный путь
-        { id: '3', name: 'Заправка', icon: 'gas-station' },
+        { id: '3', name: 'Заправка', icon: 'flame' },
       ] as ServiceItem[],
-    },
+    }, // ща ща аща все будет
     {
       title: 'Избранное',
       data: [
         { id: '4', name: 'Автосервис', icon: 'settings' },
-        { id: '5', name: 'Аптеки', icon: 'medical-bag' },
+        { id: '5', name: 'Техника', icon: 'build' },
         { id: '6', name: 'Транспорт', icon: 'bus', link: '/(tabs)/TransportScreen' },
       ] as ServiceItem[],
     },

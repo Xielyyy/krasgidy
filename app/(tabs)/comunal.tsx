@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 
 import { Ionicons } from '@expo/vector-icons';
 import { PieChart } from 'react-native-chart-kit';
 
-// Типы данных
+// Типы данных остаются без изменений
 type Outage = {
   id: number;
   type: 'Вода' | 'Электричество' | 'Газ';
@@ -30,7 +30,7 @@ interface EmergencyContacts {
   gas: string;
 }
 
-// Константы данных
+// Константы данных остаются без изменений
 const districtOutages: DistrictOutages = {
   Центральный: [
     { id: 1, type: 'Вода', time: '10:00 - 14:00', reason: 'Плановые работы', read: false },
@@ -74,8 +74,8 @@ const emergencyContacts: EmergencyContacts = {
   gas: '+7 (XXX) XXX-XX-XX'
 };
 
-// Основной компонент
 export default function ComunalkaScreen() {
+  // Логика компонента остается без изменений
   const [district, setDistrict] = useState<District>('Центральный');
   const [outages, setOutages] = useState<Outage[]>(districtOutages[district]);
   const [report, setReport] = useState({
@@ -116,7 +116,6 @@ export default function ComunalkaScreen() {
     return color;
   };
 
-  // Подготовка данных для диаграммы
   const chartData = Object.keys(outageAnalytics).map((key) => {
     const type = key as keyof OutageAnalytics;
     return {
@@ -130,9 +129,12 @@ export default function ComunalkaScreen() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.header}>Коммунальные услуги</Text>
+      {/* Заголовок с синим фоном как в примере */}
+      <View style={styles.header}>
+        <Text style={styles.headerText}>Коммунальные услуги</Text>
+      </View>
 
-      {/* Выбор района */}
+      {/* Выбор района - стилизованные кнопки */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Ваш район:</Text>
         <View style={styles.districtButtons}>
@@ -145,13 +147,18 @@ export default function ComunalkaScreen() {
               ]}
               onPress={() => changeDistrict(districtName)}
             >
-              <Text style={styles.districtButtonText}>{districtName}</Text>
+              <Text style={[
+                styles.districtButtonText,
+                district === districtName && styles.activeDistrictButtonText
+              ]}>
+                {districtName}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
       </View>
 
-      {/* Список отключений */}
+      {/* Список отключений - карточки как в примере */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Ближайшие отключения:</Text>
         {outages.map((outage) => (
@@ -174,7 +181,7 @@ export default function ComunalkaScreen() {
         ))}
       </View>
 
-      {/* Советы */}
+      {/* Советы - стилизованные как в примере */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Советы:</Text>
         {tips.map((tip, index) => (
@@ -185,15 +192,24 @@ export default function ComunalkaScreen() {
         ))}
       </View>
 
-      {/* Контакты */}
+      {/* Контакты - простой список */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Контакты аварийных служб:</Text>
-        <Text style={styles.contactText}>Водоканал: {emergencyContacts.water}</Text>
-        <Text style={styles.contactText}>Электросети: {emergencyContacts.electricity}</Text>
-        <Text style={styles.contactText}>Газовая служба: {emergencyContacts.gas}</Text>
+        <View style={styles.contactItem}>
+          <Ionicons name="water" size={18} color="#2196F3" />
+          <Text style={styles.contactText}>Водоканал: {emergencyContacts.water}</Text>
+        </View>
+        <View style={styles.contactItem}>
+          <Ionicons name="flash" size={18} color="#FFC107" />
+          <Text style={styles.contactText}>Электросети: {emergencyContacts.electricity}</Text>
+        </View>
+        <View style={styles.contactItem}>
+          <Ionicons name="flame" size={18} color="#F44336" />
+          <Text style={styles.contactText}>Газовая служба: {emergencyContacts.gas}</Text>
+        </View>
       </View>
 
-      {/* Форма отчетности */}
+      {/* Форма отчетности - стилизованные поля ввода */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Сообщить о поломке:</Text>
         <TextInput
@@ -209,7 +225,7 @@ export default function ComunalkaScreen() {
           onChangeText={text => setReport({...report, type: text as 'Вода' | 'Электричество' | 'Газ'})}
         />
         <TextInput
-          style={[styles.input, { height: 80 }]}
+          style={[styles.input, styles.multilineInput]}
           placeholder="Описание"
           value={report.description}
           onChangeText={text => setReport({...report, description: text})}
@@ -227,47 +243,56 @@ export default function ComunalkaScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Аналитика */}
+      {/* Аналитика - диаграмма */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Аналитика поломок за месяц:</Text>
-        <PieChart
-          data={chartData}
-          width={300}
-          height={200}
-          chartConfig={{
-            backgroundColor: '#fff',
-            backgroundGradientFrom: '#fff',
-            backgroundGradientTo: '#fff',
-            color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`
-          }}
-          accessor="population"
-          backgroundColor="transparent"
-          paddingLeft="15"
-          absolute
-        />
+        <View style={styles.chartContainer}>
+          <PieChart
+            data={chartData}
+            width={300}
+            height={200}
+            chartConfig={{
+              backgroundColor: '#fff',
+              backgroundGradientFrom: '#fff',
+              backgroundGradientTo: '#fff',
+              color: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`
+            }}
+            accessor="population"
+            backgroundColor="transparent"
+            paddingLeft="15"
+            absolute
+          />
+        </View>
       </View>
     </ScrollView>
   );
 }
 
-// Стили
+// Обновленные стили в соответствии с изображением
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#F5F5F5',
   },
   header: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    backgroundColor: '#007AFF',
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 16,
-    color: '#333',
+  },
+  headerText: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   section: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
     padding: 16,
     marginBottom: 16,
+    marginHorizontal: 16,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -278,7 +303,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 12,
-    color: '#333',
+    color: '#333333',
   },
   districtButtons: {
     flexDirection: 'row',
@@ -289,21 +314,28 @@ const styles = StyleSheet.create({
     width: '48%',
     padding: 12,
     borderRadius: 8,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#E0E0E0',
     marginBottom: 8,
     alignItems: 'center',
   },
   activeDistrictButton: {
-    backgroundColor: '#1E88E5',
+    backgroundColor: '#007AFF',
   },
   districtButtonText: {
     fontSize: 14,
-    color: '#333',
+    color: '#333333',
+  },
+  activeDistrictButtonText: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
   },
   outageItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
+    padding: 12,
+    borderRadius: 8,
+    backgroundColor: '#FAFAFA',
   },
   outageTextContainer: {
     marginLeft: 12,
@@ -312,47 +344,71 @@ const styles = StyleSheet.create({
   outageType: {
     fontSize: 16,
     fontWeight: 'bold',
+    color: '#333333',
   },
   outageTime: {
     fontSize: 14,
-    color: '#666',
+    color: '#666666',
+    marginTop: 4,
   },
   outageReason: {
     fontSize: 12,
-    color: '#999',
+    color: '#999999',
+    marginTop: 4,
   },
   tipItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 8,
+    padding: 8,
+    borderRadius: 8,
+    backgroundColor: '#FFF9C4',
   },
   tipText: {
     fontSize: 14,
-    color: '#666',
+    color: '#333333',
     marginLeft: 8,
     flex: 1,
   },
+  contactItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
   contactText: {
     fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+    color: '#333333',
+    marginLeft: 8,
   },
   input: {
-    height: 40,
-    borderColor: '#ccc',
+    height: 48,
+    borderColor: '#E0E0E0',
     borderWidth: 1,
-    borderRadius: 4,
+    borderRadius: 8,
     marginBottom: 12,
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
+    fontSize: 14,
+    backgroundColor: '#FAFAFA',
+  },
+  multilineInput: {
+    height: 100,
+    textAlignVertical: 'top',
+    paddingTop: 12,
   },
   submitButton: {
-    backgroundColor: '#1E88E5',
-    padding: 12,
-    borderRadius: 4,
+    backgroundColor: '#007AFF',
+    padding: 14,
+    borderRadius: 8,
     alignItems: 'center',
+    marginTop: 8,
   },
   submitButtonText: {
-    color: '#fff',
+    color: '#FFFFFF',
+    fontSize: 16,
     fontWeight: 'bold',
+  },
+  chartContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

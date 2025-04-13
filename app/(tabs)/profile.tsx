@@ -1,205 +1,183 @@
-import React, { useState, createContext, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Switch, ScrollView } from 'react-native';
+import React from 'react';
+import { View, Text, Button, Switch, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 
-// Тип для данных профиля
-type Profile = {
+interface UserData {
   name: string;
   phone: string;
   district: string;
-};
+}
 
-// Тип для настроек
-type Settings = {
-  notificationsEnabled: boolean;
-};
-
-// Контекст для управления состоянием профиля и настроек
-type ProfileContextType = {
-  profile: Profile;
-  setProfile: React.Dispatch<React.SetStateAction<Profile>>;
-  settings: Settings;
-  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
-};
-
-const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
-
-export const useProfile = () => {
-  const context = useContext(ProfileContext);
-  if (!context) {
-    throw new Error('useProfile must be used within a ProfileProvider');
-  }
-  return context;
-};
-
-export const ProfileProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [profile, setProfile] = useState<Profile>({
+const UserProfile: React.FC = () => {
+  // Состояние пользовательских данных
+  const [userData, setUserData] = React.useState<UserData>({
     name: 'Иванов Иван',
     phone: '+7 (999) 123-45-67',
     district: 'Центральный',
   });
 
-  const [settings, setSettings] = useState<Settings>({
-    notificationsEnabled: true,
-  });
+  const [isEditing, setIsEditing] = React.useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = React.useState(false);
+  const [tempData, setTempData] = React.useState<UserData>({ ...userData });
+
+  const toggleSwitch = () => setNotificationsEnabled(previousState => !previousState);
+
+  const handleEdit = () => {
+    if (isEditing) {
+      // Сохраняем изменения
+      setUserData({ ...tempData });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleChangePassword = () => {
+    // Здесь может быть логика для смены пароля
+    console.log('Инициирована смена пароля');
+  };
+
+  const handleInputChange = (field: keyof UserData, value: string) => {
+    setTempData(prev => ({ ...prev, [field]: value }));
+  };
 
   return (
-    <ProfileContext.Provider value={{ profile, setProfile, settings, setSettings }}>
-      {children}
-    </ProfileContext.Provider>
+    <View style={styles.container}>
+      <Text style={styles.title}>Личные данные</Text>
+      
+      <View style={styles.section}>
+        <Text style={styles.label}>Имя:</Text>
+        {isEditing ? (
+          <TextInput 
+            style={styles.input}
+            value={tempData.name}
+            onChangeText={(text: string) => handleInputChange('name', text)}
+          />
+        ) : (
+          <Text style={styles.value}>{userData.name}</Text>
+        )}
+        
+        <Text style={styles.label}>Телефон:</Text>
+        {isEditing ? (
+          <TextInput 
+            style={styles.input}
+            value={tempData.phone}
+            onChangeText={(text: string) => handleInputChange('phone', text)}
+            keyboardType="phone-pad"
+          />
+        ) : (
+          <Text style={styles.value}>{userData.phone}</Text>
+        )}
+        
+        <Text style={styles.label}>Район:</Text>
+        {isEditing ? (
+          <TextInput 
+            style={styles.input}
+            value={tempData.district}
+            onChangeText={(text: string) => handleInputChange('district', text)}
+          />
+        ) : (
+          <Text style={styles.value}>{userData.district}</Text>
+        )}
+      </View>
+      
+      <TouchableOpacity 
+        style={[styles.button, isEditing && styles.saveButton]}
+        onPress={handleEdit}
+      >
+        <Text style={styles.buttonText}>
+          {isEditing ? 'СОХРАНИТЬ' : 'РЕДАКТИРОВАТЬ'}
+        </Text>
+      </TouchableOpacity>
+
+      <View style={styles.section}>
+        <Text style={styles.settingsTitle}>Настройки</Text>
+        
+        <View style={styles.settingsRow}>
+          <Text style={styles.settingLabel}>Уведомления</Text>
+          <Switch
+            value={notificationsEnabled}
+            onValueChange={toggleSwitch}
+          />
+        </View>
+      </View>
+      
+      <TouchableOpacity 
+        style={styles.button}
+        onPress={handleChangePassword}
+      >
+        <Text style={styles.buttonText}>ИЗМЕНИТЬ ПАРОЛЬ</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
-// Компонент для отображения и редактирования профиля
-const ProfileSection: React.FC<{ isEditing: boolean; setIsEditing: (value: boolean) => void }> = React.memo(({ isEditing, setIsEditing }) => {
-  const { profile, setProfile } = useProfile();
-
-  const handleProfileChange = (field: keyof Profile, value: string) => {
-    setProfile((prevProfile) => ({ ...prevProfile, [field]: value }));
-  };
-
-  const saveChanges = () => {
-    setIsEditing(false);
-    // Здесь можно добавить логику для сохранения данных на сервере
-  };
-
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Личные данные</Text>
-      {isEditing ? (
-        <>
-          <TextInput
-            style={styles.input}
-            value={profile.name}
-            onChangeText={(text) => handleProfileChange('name', text)}
-            placeholder="Имя"
-          />
-          <TextInput
-            style={styles.input}
-            value={profile.phone}
-            onChangeText={(text) => handleProfileChange('phone', text)}
-            placeholder="Телефон"
-          />
-          <TextInput
-            style={styles.input}
-            value={profile.district}
-            onChangeText={(text) => handleProfileChange('district', text)}
-            placeholder="Район"
-          />
-        </>
-      ) : (
-        <>
-          <Text style={styles.sectionText}>Имя: {profile.name}</Text>
-          <Text style={styles.sectionText}>Телефон: {profile.phone}</Text>
-          <Text style={styles.sectionText}>Район: {profile.district}</Text>
-        </>
-      )}
-      <TouchableOpacity
-        style={styles.button}
-        onPress={isEditing ? saveChanges : () => setIsEditing(true)}
-      >
-        <Text style={styles.buttonText}>{isEditing ? 'Сохранить' : 'Редактировать'}</Text>
-      </TouchableOpacity>
-    </View>
-  );
-});
-
-// Компонент для отображения настроек
-const SettingsSection: React.FC = React.memo(() => {
-  const { settings, setSettings } = useProfile();
-
-  return (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Настройки</Text>
-      <View style={styles.settingItem}>
-        <Text style={styles.sectionText}>Уведомления</Text>
-        <Switch
-          value={settings.notificationsEnabled}
-          onValueChange={(value) => setSettings((prevSettings) => ({ ...prevSettings, notificationsEnabled: value }))}
-        />
-      </View>
-      <TouchableOpacity
-        style={styles.settingItem}
-        onPress={() => console.log('Переход к смене пароля')}
-      >
-        <Text style={styles.sectionText}>Смена пароля</Text>
-      </TouchableOpacity>
-    </View>
-  );
-});
-
-// Основной компонент
-export default function ProfileScreen() {
-  const [isEditing, setIsEditing] = useState<boolean>(false);
-
-  return (
-    <ProfileProvider>
-      <ScrollView style={styles.container}>
-        <Text style={styles.header}>Профиль</Text>
-        <ProfileSection isEditing={isEditing} setIsEditing={setIsEditing} />
-        <SettingsSection />
-      </ScrollView>
-    </ProfileProvider>
-  );
-}
-
-// Стили
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    color: '#333',
+    padding: 20,
+    backgroundColor: '#FFFFFF',
   },
   section: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    marginBottom: 20,
   },
-  sectionTitle: {
-    fontSize: 18,
+  title: {
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 8,
-    color: '#333',
+    marginBottom: 25,
+    textAlign: 'center',
   },
-  sectionText: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 4,
+  label: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginTop: 10,
+    color: '#555',
+  },
+  value: {
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
   input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 4,
-    marginBottom: 12,
-    paddingHorizontal: 8,
+    fontSize: 16,
+    color: '#333',
+    marginBottom: 10,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: '#007BFF',
   },
-  button: {
-    backgroundColor: '#007bff',
-    padding: 10,
-    borderRadius: 4,
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  buttonText: {
-    color: '#fff',
+  settingsTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#333',
   },
-  settingItem: {
+  settingsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: 15,
+    paddingVertical: 8,
+  },
+  settingLabel: {
+    fontSize: 16,
+    color: '#555',
+  },
+  button: {
+    backgroundColor: '#007BFF',
+    padding: 12,
+    borderRadius: 15,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  saveButton: {
+    backgroundColor: '#28a745',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 16,
   },
 });
+
+export default UserProfile;

@@ -7,8 +7,8 @@ import {
   StyleSheet, 
   ScrollView, 
   TouchableOpacity,
-  ListRenderItem,
   SafeAreaView,
+  ListRenderItem,
   StatusBar
 } from 'react-native';
 import { MaterialIcons, Ionicons } from '@expo/vector-icons';
@@ -59,7 +59,7 @@ const HomeScreen = () => {
     }
   ];
 
-  // Данные для новостей с корректными изображениями
+  // Данные для новостей
   const news: NewsItem[] = [
     {
       id: '1',
@@ -106,8 +106,17 @@ const HomeScreen = () => {
   };
 
   // Рендер карточки оповещения
-  const renderAlertItem: ListRenderItem<AlertItem> = ({ item }) => (
-    <View style={styles.alertCard}>
+const renderAlertItem: ListRenderItem<AlertItem> = ({ item }) => {
+  return (
+    <View style={[
+      styles.alertCard,
+      { 
+        borderLeftColor: 
+          item.type === 'water' ? '#2196F3' : 
+          item.type === 'electricity' ? '#FFC107' : 
+          '#4CAF50' 
+      }
+    ]}>
       <View style={styles.alertIcon}>
         {getAlertIcon(item.type)}
       </View>
@@ -118,13 +127,12 @@ const HomeScreen = () => {
       </View>
     </View>
   );
+};
 
-  // Рендер карточки новости (без placeholder)
-  const renderNewsItem: ListRenderItem<NewsItem> = ({ item }) => (
-    <TouchableOpacity 
-      style={styles.newsCard}
-      onPress={() => console.log('Новость открыта:', item.id)}
-    >
+// Рендер карточки новости
+const renderNewsItem: ListRenderItem<NewsItem> = ({ item }) => {
+  return (
+    <TouchableOpacity style={styles.newsCard}>
       <Image 
         source={{ uri: item.image }} 
         style={styles.newsImage}
@@ -137,21 +145,21 @@ const HomeScreen = () => {
       </View>
     </TouchableOpacity>
   );
+};
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="dark-content" />
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Главная</Text>
-        <TouchableOpacity 
-          style={styles.notificationButton}
-          onPress={() => router.push('/notification')}
-        >
-          <Ionicons name="notifications-outline" size={24} color="#333" />
+        <TouchableOpacity style={styles.notificationButton} 
+        onPress={() => router.push('/notification')}>
+          
+          <Ionicons name="notifications-outline" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
-      <ScrollView style={styles.container}>
+<ScrollView style={styles.container}>
         {/* Секция с оповещениями */}
         <Text style={styles.sectionTitle}>Ближайшие события</Text>
         <FlatList
@@ -183,6 +191,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   header: {
+    backgroundColor: '#007AFF',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -195,7 +204,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: 'white',
   },
   notificationButton: {
     padding: 8,
@@ -217,11 +226,13 @@ const styles = StyleSheet.create({
   },
   alertCard: {
     width: 280,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#fff',
     borderRadius: 8,
     padding: 12,
     marginRight: 12,
     flexDirection: 'row',
+    borderLeftWidth: 4,
+    elevation: 2,
   },
   alertIcon: {
     marginRight: 12,
